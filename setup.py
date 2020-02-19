@@ -13,7 +13,7 @@ setup(
     author_email = "adamcathersides@gmail.com",
     description = ("Run glcoud and kubectl containers as if they were installed"),
     url='',
-    packages = ['gcloud'],
+    packages = ['gcloud_run'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     include_package_data = True,
@@ -27,7 +27,7 @@ setup(
     ],
     entry_points={
           'console_scripts': [
-              'gcloud = gcloud.gcloud:run'
+              'gcloud = gcloud_run.gcloud:run'
           ]
       }
 )
