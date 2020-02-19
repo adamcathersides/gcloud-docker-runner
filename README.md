@@ -1,3 +1,3 @@
-# Python project
+# Gcloud and kubectl container runner
 
-A quick boilerplate for creating a python CLI app package.
+Run glcoud and kubectl containers as if they were installed

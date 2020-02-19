@@ -7,17 +7,19 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name = "python-project",
+    name = "gcloud-docker-runner",
     version = "0.0.1",
-    author = "",
-    author_email = "",
-    description = ("A prjoect"),
+    author = "Aadm Cathersides",
+    author_email = "adamcathersides@gmail.com",
+    description = ("Run glcoud and kubectl containers as if they were installed"),
     url='',
-    packages = ['package_name'],
+    packages = ['gcloud'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     include_package_data = True,
     install_requires = [
+        'click',
+        'docker'
     ],
     classifiers = [
         "Development Status :: 3 - Alpha",
@@ -25,7 +27,7 @@ setup(
     ],
     entry_points={
           'console_scripts': [
-              'project-entrypoint = package_name.package_name:run'
+              'gcloud = gcloud.gcloud:run'
           ]
       }
 )
