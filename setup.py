@@ -19,7 +19,8 @@ setup(
     include_package_data = True,
     install_requires = [
         'click',
-        'docker'
+        'docker',
+        'dockerpty'
     ],
     classifiers = [
         "Development Status :: 3 - Alpha",
@@ -27,7 +28,8 @@ setup(
     ],
     entry_points={
           'console_scripts': [
-              'gcloud = gcloud_run.gcloud:run'
+              'gcloud = gcloud_run.gcloud:run',
+              'kubectl = gcloud_run.gcloud:run'
           ]
       }
 )

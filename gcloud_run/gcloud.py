@@ -2,53 +2,59 @@
 
 import click
 import docker
-import logging
+import dockerpty
 import sys
 import pwd
 import getpass
+import os
 from pathlib import Path
+import sys
 
-
-def start_container(client, image, name, uid, config_dir, home, cmd):
+def start_container(client, image, name, uid, gid, config_dir, home, cmd):
 
     """
     Start container
     """
 
-    container = client.containers.run(
+    host_config = client.create_host_config(binds={config_dir: {'bind': config_dir, 'mode': 'rw'}})
+
+    container = client.create_container(
                     image,
-                    detach=True,
-                    command='sleep 60',
                     name=name,
-                    user=uid,
-                    volumes={config_dir: {'bind': config_dir, 'mode': 'rw'}},
+                    user=f'{uid}:{gid}',
                     environment={'HOME':home},
+                    volumes=[config_dir],
+                    command=cmd,
+                    tty=True,
+                    stdin_open=True,
+                    host_config=host_config
                 )
 
-    res = container.exec_run(f'gcloud {cmd}', stream=True, demux=False)
-    # container.wait()
-    for n in res.output:
-        print(n.decode('utf-8'))
-    container.stop()
-    container.remove()
+    dockerpty.start(client, container)
+
+    client.remove_container(container, force=True)
 
 @click.command()
+@click.option('-s', '--docker-socket', 'docker_socket', default='unix://var/run/docker.sock')
 @click.argument('args', nargs=-1)
-def run(args):
+def run(args, docker_socket):
     """Example CLI app"""
-
-    logger = logging.getLogger(__name__)
-    log_handler = logging.StreamHandler(sys.stderr)
-    logger.addHandler(log_handler)
 
 
     home = str(Path.home())
-    client = docker.from_env()
+    client = docker.APIClient(base_url=docker_socket)
     uid = int(pwd.getpwnam(getpass.getuser()).pw_uid)
-    config_dir = f'{home}/.config/gcloud'
-    cmd = " ".join(args)
+    gid = int(pwd.getpwnam(getpass.getuser()).pw_gid)
+    app = (Path(sys.argv[0]).name)
+    cmd = f'{app} {" ".join(args)}'
 
-    start_container(client, 'google/cloud-sdk:latest', 'gcloud', uid, config_dir, home, cmd)
+
+    if app == 'gcloud':
+        config_dir = f'{home}/.config/gcloud'
+    elif app == 'kubectl':
+        config_dir = f'{home}/.kube'
+
+    start_container(client, 'google/cloud-sdk:latest', app, uid, gid, config_dir, home, cmd)
 
 if __name__ == '__main__':
     run()
